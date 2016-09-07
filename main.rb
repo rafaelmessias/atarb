@@ -2,6 +2,7 @@
 
 require_relative 'mpu6507'
 require_relative 'instructions'
+require_relative 'pia6532'
 
 # Misc. parameters
 Debug = true
@@ -12,8 +13,7 @@ INTIM = 0x284
 
 # Hardware Setup
 $memory[SWCHB] = 0x00111111
-#$memory[INTIM] = rand(256)
-$intim_clock = 0
+PIA::start()
 
 $rom = IO.binread(ARGV[0])
 
@@ -36,6 +36,8 @@ while $reg_PC < 0xFFFF do
     puts "%02X ???" % opcode
     exit
   end
+
+  PIA::clock()
 
   if Debug
     print "----- "
