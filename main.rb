@@ -15,7 +15,7 @@ $memory[SWCHB] = 0x00111111
 #$memory[INTIM] = rand(256)
 $intim_clock = 0
 
-$rom = IO.binread("River Raid.A26")
+$rom = IO.binread(ARGV[0])
 
 # Load cartridge into right "memory" addresses
 addr = $reg_PC
