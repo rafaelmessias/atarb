@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative 'mpu6502'
+require_relative 'mpu6507'
 require_relative 'instructions'
 
 # Misc. parameters
