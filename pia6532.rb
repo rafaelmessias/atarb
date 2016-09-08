@@ -7,9 +7,10 @@ class PIA
   def self.start
     $memory[INTIM] = rand(256)
     @timer_on = true
+    $memory[TIMINT] = 128
   end
 
-  def self.clock
+  def self.tick
     if @timer_on
       if $memory[INTIM] >= 0
         @timer -= 1
@@ -23,6 +24,7 @@ class PIA
         @timer_on = false
       end
     end
+    $memory[TIMINT] = @timer_on ? 128 : 0
   end
 
 end

@@ -10,12 +10,19 @@ Debug = true
 # Mnemonics
 SWCHB = 0x282
 INTIM = 0x284
+TIMINT = 0x285
 
 # Hardware Setup
 $memory[SWCHB] = 0x00111111
 PIA::start()
 
 $rom = IO.binread(ARGV[0])
+
+def sync(cycles)
+  cycles.times do
+    PIA::tick()
+  end
+end
 
 # Load cartridge into right "memory" addresses
 addr = $reg_PC
@@ -31,13 +38,12 @@ while $reg_PC < 0xFFFF do
   instruction = $instructions[opcode]
 
   if !instruction.nil?
-    instruction.call
+    cycles = instruction.call
+    sync(cycles)
   else
     puts "%02X ???" % opcode
     exit
   end
-
-  PIA::clock()
 
   if Debug
     print "----- "
@@ -49,7 +55,9 @@ while $reg_PC < 0xFFFF do
     print $flag_Z ? "Z " : "z "
     print $flag_C ? "C " : "c "
     print $flag_D ? "D " : "d "
-    #print "| St: %02X | " % $memory[$reg_SP+1] if $reg_SP < 0xFF
+    if $reg_SP < 0xFF && !$memory[$reg_SP+1].nil?
+      print "| St: %02X | " % $memory[$reg_SP+1]
+    end
     puts "-----"
   end
 

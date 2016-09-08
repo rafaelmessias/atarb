@@ -24,6 +24,13 @@ def load_byte()
   byte
 end
 
+# Load next 2 bytes from cartridge
+def load_word()
+  low = load_byte()
+  high = load_byte()
+  return low, high
+end
+
 def byte_add(b1, b2)
   (b1 + b2) % 256
 end
@@ -39,9 +46,26 @@ def get_relative_addr(byte)
   $reg_PC + byte
 end
 
+def get_indirect_x(byte)
+  addr = byte + $reg_X
+  $memory[addr] + $memory[addr + 1] * 256
+end
+
+def get_indirect_y(byte)
+  addr = $memory[byte] + $memory[byte + 1] * 256
+  addr + $reg_Y
+end
+
 def update_NZ_flags(value)
   $flag_N = value > 127
   $flag_Z = value == 0
+end
+
+def op_ASL(byte)
+  $flag_C = byte & 128
+  byte = (byte << 1) % 256
+  update_NZ_flags(byte)
+  byte
 end
 
 def op_AND(byte)
@@ -50,9 +74,13 @@ def op_AND(byte)
 end
 
 def op_ADC(byte)
-  # TODO: correctly use D and V flags
+  # TODO: correctly handle flags D and V
+  if $reg_D
+    puts "Called ADC with reg_D set; can't handle this yet. Sorry."
+    exit(-1)
+  end
   aux = $reg_A + byte + ($flag_C ? 1 : 0)
-  $flag_C = aux > 255
+  $flag_C = aux > 256
   $reg_A = aux % 256
   update_NZ_flags($reg_A)
 end
