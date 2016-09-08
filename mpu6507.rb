@@ -18,17 +18,10 @@ $flag_Z = false
 $flag_C = false
 
 # Load next byte from cartridge
-def load_byte()
+def fetch()
   byte = $memory[$reg_PC]
   $reg_PC += 1
   byte
-end
-
-# Load next 2 bytes from cartridge
-def load_word()
-  low = load_byte()
-  high = load_byte()
-  return low, high
 end
 
 def stack_push(byte)
@@ -98,6 +91,7 @@ end
 def op_SBC(byte)
   # TODO: correctly use D and V flags
   aux = $reg_A - byte - ($flag_C ? 0 : 1)
+  # TODO: is this really how you set the C flag?
   $flag_C = !(aux < 0)
   $reg_A = aux % 256
   update_NZ_flags($reg_A)
@@ -125,10 +119,10 @@ def op_EOR(byte)
   update_NZ_flags($reg_A)
 end
 
-def op_DEC(reg)
-  reg = byte_add(reg, -1)
-  update_NZ_flags(reg)
-  reg
+def op_DEC(value)
+  value = byte_add(value, -1)
+  update_NZ_flags(value)
+  value
 end
 
 def op_LDA(byte)

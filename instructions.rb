@@ -10,7 +10,7 @@ $instructions = []
 
 # ADC [Immediate]
 $instructions[0x69] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "ADC \#$%02X" % param if Debug
   op_ADC(param)
   2
@@ -18,7 +18,7 @@ end
 
 # ADC [Zero Page]
 $instructions[0x65] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "ADC $%02X" % param if Debug
   op_ADC($memory[param])
   3
@@ -26,7 +26,7 @@ end
 
 # ADC [Zero Page,X]
 $instructions[0x75] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "ADC $%02X,X" % param if Debug
   addr = byte_add(param, $reg_X)
   op_ADC($memory[addr])
@@ -35,7 +35,7 @@ end
 
 # ADC [Absolute]
 $instructions[0x6D] = Proc.new do
-  addr = get_absolute_addr(load_word())
+  addr = get_absolute_addr(fetch(), fetch())
   puts "ADC $%04X" % addr if Debug
   op_ADC($memory[addr])
   4
@@ -43,7 +43,7 @@ end
 
 # ADC [Absolute,X]
 $instructions[0x7D] = Proc.new do
-  addr = get_absolute_addr(load_word())
+  addr = get_absolute_addr(fetch(), fetch())
   puts "ADC $%04X,X" % addr if Debug
   addr += $reg_X
   op_ADC($memory[addr])
@@ -53,7 +53,7 @@ end
 
 # ADC [Absolute,Y]
 $instructions[0x79] = Proc.new do
-  addr = get_absolute_addr(load_word())
+  addr = get_absolute_addr(fetch(), fetch())
   puts "ADC $%04X,Y" % addr if Debug
   addr += $reg_Y
   op_ADC($memory[addr])
@@ -63,7 +63,7 @@ end
 
 # ADC [(Indirect,X)]
 $instructions[0x61] = Proc.new do
-  addr = load_byte()
+  addr = fetch()
   puts "ADC ($%02X,X)" % addr if Debug
   addr = get_indirect_x(byte)
   op_ADC($memory[addr])
@@ -72,7 +72,7 @@ end
 
 # ADC [(Indirect),Y]
 $instructions[0x71] = Proc.new do
-  addr = load_byte()
+  addr = fetch()
   puts "ADC ($%02X),Y" % addr if Debug
   addr = get_indirect_y(byte)
   op_ADC($memory[addr])
@@ -89,7 +89,7 @@ end
 
 # ASL [Zero Page]
 $instructions[0x06] = Proc.new do
-  addr = load_byte()
+  addr = fetch()
   puts "ASL $%02X" % byte if Debug
   $memory[addr] = op_ASL($memory[addr])
   5
@@ -97,7 +97,7 @@ end
 
 # ASL [Zero Page,X]
 $instructions[0x16] = Proc.new do
-  byte = load_byte()
+  byte = fetch()
   puts "ASL $%02X,X" % byte if Debug
   addr = byte_add(byte, $reg_X)
   $memory[addr] = op_ASL($memory[addr])
@@ -106,7 +106,7 @@ end
 
 # ASL [Absolute]
 $instructions[0x0E] = Proc.new do
-  addr = get_absolute_addr(load_word())
+  addr = get_absolute_addr(fetch(), fetch())
   puts "ASL $%04X" % addr if Debug
   $memory[addr] = op_ASL($memory[addr])
   6
@@ -115,7 +115,7 @@ end
 # ASL [Absolute,X]
 $instructions[0x1E] = Proc.new do
   # TODO When it goes to next page it costs one more cycle
-  addr = get_absolute_addr(load_word())
+  addr = get_absolute_addr(fetch(), fetch())
   puts "ASL $%04X,X" % addr if Debug
   addr += $reg_X
   $memory[addr] = op_ASL($memory[addr])
@@ -124,7 +124,7 @@ end
 
 # ORA (Immediate)
 $instructions[0x09] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "ORA \#$%02x" % param
   op_ORA(param)
   2
@@ -132,7 +132,7 @@ end
 
 # BPL
 $instructions[0x10] = Proc.new do
-  addr = get_relative_addr(load_byte())
+  addr = get_relative_addr(fetch())
   # not sure if this is the correct way to disassemble
   puts "BPL $%02X" % addr
   cycles = 2
@@ -153,9 +153,7 @@ end
 
 # JSR
 $instructions[0x20] = Proc.new do
-  low = load_byte()
-  high = load_byte()
-  addr = get_absolute_addr(low, high)
+  addr = get_absolute_addr(fetch(), fetch())
   puts "JSR $%04X" % addr
   stack_push(($reg_PC-1) >> 8)
   stack_push(($reg_PC-1) & 255)
@@ -165,7 +163,7 @@ end
 
 # BIT [Zero Page]
 $instructions[0x24] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "BIT $%02X" % param
   aux = $memory[param] & $reg_A
   $flag_N = $memory[param] > 127
@@ -176,7 +174,7 @@ end
 
 # AND (Zero Page)
 $instructions[0x25] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "AND $%02X" % param
   op_AND($memory[param])
   3
@@ -184,7 +182,7 @@ end
 
 # AND (Immediate)
 $instructions[0x29] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "AND \#$%02X" % param
   op_AND(param)
   2
@@ -199,7 +197,7 @@ end
 
 # EOR (Zero Page)
 $instructions[0x45] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "EOR $%02X" % param
   op_EOR($memory[param])
   3
@@ -207,7 +205,7 @@ end
 
 # LSR (Zero Page)
 $instructions[0x46] = Proc.new do
-  addr = load_byte()
+  addr = fetch()
   puts "LSR $%02X" % addr
   $memory[addr] = op_LSR($memory[addr])
   5
@@ -222,7 +220,7 @@ end
 
 # EOR (Immediate)
 $instructions[0x49] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "EOR \#$%02X" % param
   op_EOR(param)
   2
@@ -258,7 +256,7 @@ end
 
 # STY (Zero Page)
 $instructions[0x84] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "STY $%02X" % param
   $memory[param] = $reg_Y
   3
@@ -266,7 +264,7 @@ end
 
 # STA [Zero Page]
 $instructions[0x85] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "STA $%02X" % param
   $memory[param] = $reg_A
   3
@@ -274,7 +272,7 @@ end
 
 # STX [Zero Page]
 $instructions[0x86] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "STX $%02X" % param
   $memory[param] = $reg_X
   3
@@ -297,7 +295,7 @@ end
 
 # BCC
 $instructions[0x90] = Proc.new do
-  addr = get_relative_addr(load_byte())
+  addr = get_relative_addr(fetch())
   puts "BCC \$%02X" % addr
   cycles = 2
   if !$flag_C
@@ -310,7 +308,7 @@ end
 
 # STY (Zero Page,X)
 $instructions[0x94] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "STY \$%02X,X" % param
   $memory[byte_add(param, $reg_X)] = $reg_Y
   4
@@ -318,7 +316,7 @@ end
 
 # STA (Zero Page,X)
 $instructions[0x95] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "STA $%02X,X" % param
   $memory[byte_add(param, $reg_X)] = $reg_A
   4
@@ -341,7 +339,7 @@ end
 
 # LDY (Immediate)
 $instructions[0xA0] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "LDY \#\$%02X" % param
   $reg_Y = param
   update_NZ_flags($reg_Y)
@@ -350,7 +348,7 @@ end
 
 # LDX (Immediate)
 $instructions[0xA2] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "LDX \#\$%02X" % param
   $reg_X = param
   update_NZ_flags($reg_X)
@@ -359,7 +357,7 @@ end
 
 # LDY (Zero Page)
 $instructions[0xA4] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "LDY $%02X" % param
   $reg_Y = $memory[param]
   update_NZ_flags($reg_Y)
@@ -368,7 +366,7 @@ end
 
 # LDA (Zero Page)
 $instructions[0xA5] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "LDA \$%02X" % param
   op_LDA($memory[param])
   3
@@ -376,7 +374,7 @@ end
 
 # LDX [Zero Page]
 $instructions[0xA6] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "LDX $%02X" % param
   $reg_X = $memory[param]
   update_NZ_flags($reg_X)
@@ -393,7 +391,7 @@ end
 
 # LDA (Immediate)
 $instructions[0xA9] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "LDA \#\$%02X" % param
   op_LDA(param)
   2
@@ -409,9 +407,7 @@ end
 
 # LDA (Absolute)
 $instructions[0xAD] = Proc.new do
-  low = load_byte()
-  high = load_byte()
-  addr = get_absolute_addr(low, high)
+  addr = get_absolute_addr(fetch(), fetch())
   puts "LDA $%04X" % addr
   op_LDA($memory[addr])
   4
@@ -419,7 +415,7 @@ end
 
 # BCS
 $instructions[0xB0] = Proc.new do
-  addr = get_relative_addr(load_byte())
+  addr = get_relative_addr(fetch())
   puts "BCS $%02X" % addr
   cycles = 2
   if $flag_C
@@ -432,7 +428,7 @@ end
 
 # LDA (Indirect), Y
 $instructions[0xB1] = Proc.new do
-  addr = load_byte()
+  addr = fetch()
   puts "LDA ($%02X),Y" % addr
   addr = get_indirect_y(addr)
   op_LDA($memory[addr])
@@ -442,7 +438,7 @@ end
 
 # LDY (Zero Page,X)
 $instructions[0xB4] = Proc.new do
-  addr = load_byte()
+  addr = fetch()
   puts "LDY $%02X,X" % addr
   $reg_Y = $memory[byte_add(addr, $reg_X)]
   update_NZ_flags($reg_Y)
@@ -451,7 +447,7 @@ end
 
 # LDA (Zero Page,X)
 $instructions[0xB5] = Proc.new do
-  addr = load_byte()
+  addr = fetch()
   puts "LDA $%02X,X" % addr
   op_LDA($memory[byte_add(addr, $reg_X)])
   4
@@ -459,9 +455,7 @@ end
 
 # LDA (Absolute, Y)
 $instructions[0xB9] = Proc.new do
-  low = load_byte()
-  high = load_byte()
-  addr = get_absolute_addr(low, high)
+  addr = get_absolute_addr(fetch(), fetch())
   puts "LDA $%04X,Y" % addr
   # Should wrap the add to 16-bit
   op_LDA($memory[addr + $reg_Y])
@@ -471,9 +465,7 @@ end
 
 # LDA (Absolute,X)
 $instructions[0xBD] = Proc.new do
-  low = load_byte()
-  high = load_byte()
-  addr = get_absolute_addr(low, high)
+  addr = get_absolute_addr(fetch(), fetch())
   puts "LDA $%04X,X" % addr
   # Should wrap the add to 16-bit
   op_LDA($memory[addr + $reg_X])
@@ -483,9 +475,7 @@ end
 
 # LDX (Absolute, Y)
 $instructions[0xBE] = Proc.new do
-  low = load_byte()
-  high = load_byte()
-  addr = get_absolute_addr(low, high)
+  addr = get_absolute_addr(fetch(), fetch())
   puts "LDX $%04X,Y" % addr
   # Should wrap the add to 16-bit
   $reg_X = $memory[addr + $reg_Y]
@@ -501,6 +491,14 @@ $instructions[0xCA] = Proc.new do
   2
 end
 
+# DEC [Zero Page]
+$instructions[0xC6] = Proc.new do
+  addr = fetch()
+  puts "DEC $%02X" % addr
+  $memory[addr] = op_DEC($memory[addr])
+  5
+end
+
 # INY
 $instructions[0xC8] = Proc.new do
   puts "INY"
@@ -511,7 +509,7 @@ end
 
 # CMP (Immediate)
 $instructions[0xC9] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "CMP \#$%02X" % param
   op_CMP($reg_A, param)
   2
@@ -519,7 +517,7 @@ end
 
 # BNE
 $instructions[0xD0] = Proc.new do
-  addr = get_relative_addr(load_byte())
+  addr = get_relative_addr(fetch())
   # not sure if this is the correct way to disassemble
   puts "BNE $%02X" % addr
   cycles = 2
@@ -540,15 +538,23 @@ end
 
 # CPX [Immediate]
 $instructions[0xE0] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "CPX \#$%02X" % param
   op_CMP($reg_X, param)
   2
 end
 
+# CPY [Immediate]
+$instructions[0xC0] = Proc.new do
+  param = fetch()
+  puts "CPY \#$%02X" % param
+  op_CMP($reg_Y, param)
+  2
+end
+
 # INC (Zero Page)
 $instructions[0xE6] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "INC $%02X" % param
   $memory[param] = byte_add($memory[param], 1)
   update_NZ_flags($memory[param])
@@ -563,17 +569,25 @@ $instructions[0xE8] = Proc.new do
   2
 end
 
-# SBC (Immediate)
+# SBC [Immediate]
 $instructions[0xE9] = Proc.new do
-  param = load_byte()
+  param = fetch()
   puts "SBC \#$%02X" % param
   op_SBC(param)
   2
 end
 
+# SBC [Zero Page]
+$instructions[0xE5] = Proc.new do
+  addr = fetch()
+  puts "SBC $%02X" % addr
+  op_SBC($memory[addr])
+  3
+end
+
 # BEQ
 $instructions[0xF0] = Proc.new do
-  addr = get_relative_addr(load_byte())
+  addr = get_relative_addr(fetch())
   puts "BEQ $%02X" % addr
   cycles = 2
   if $flag_Z
@@ -589,4 +603,18 @@ $instructions[0xF8] = Proc.new do
   puts "SED"
   $flag_D = true
   2
+end
+
+# NOP
+$instructions[0xEA] = Proc.new do
+  puts "NOP"
+  2
+end
+
+# JMP [Absolute]
+$instructions[0x4C] = Proc.new do
+  addr = get_absolute_addr(fetch(), fetch())
+  puts "JMP $%04X" % addr
+  $reg_PC = addr
+  3
 end

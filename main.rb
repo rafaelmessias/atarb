@@ -34,7 +34,7 @@ end
 while $reg_PC < 0xFFFF do
   print "%04X: " % $reg_PC if Debug
 
-  opcode = load_byte()
+  opcode = fetch()
   instruction = $instructions[opcode]
 
   if !instruction.nil?
