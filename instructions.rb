@@ -125,9 +125,17 @@ end
 # ORA (Immediate)
 $instructions[0x09] = Proc.new do
   param = fetch()
-  puts "ORA \#$%02x" % param
+  puts "ORA \#$%02X" % param
   op_ORA(param)
   2
+end
+
+# ORA [Zero Page]
+$instructions[0x05] = Proc.new do
+  addr = fetch()
+  puts "ORA $%02X" % addr
+  op_ORA($memory[addr])
+  3
 end
 
 # BPL

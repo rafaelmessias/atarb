@@ -7,16 +7,7 @@ require_relative 'pia6532'
 # Misc. parameters
 Debug = true
 
-# Mnemonics
-SWCHA = 0x280
-SWCHB = 0x282
-INTIM = 0x284
-TIMINT = 0x285
-
 # Hardware Setup
-# TODO These are part of the PIA
-$memory[SWCHB] = 0b00111111
-$memory[SWCHA] = 0b11111111
 PIA::start()
 
 $rom = IO.binread(ARGV[0])
