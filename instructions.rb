@@ -225,6 +225,14 @@ $instructions[0x48] = Proc.new do
   3
 end
 
+# PLA
+$instructions[0x68] = Proc.new do
+  puts "PLA"
+  $reg_A = stack_pull()
+  update_NZ_flags($reg_A)
+  4
+end
+
 # EOR (Immediate)
 $instructions[0x49] = Proc.new do
   param = fetch()
@@ -352,13 +360,23 @@ $instructions[0x9A] = Proc.new do
   2
 end
 
-# LDY (Immediate)
+# LDY [Immediate]
 $instructions[0xA0] = Proc.new do
   param = fetch()
-  puts "LDY \#\$%02X" % param
+  puts "LDY \#$%02X" % param
   $reg_Y = param
   update_NZ_flags($reg_Y)
   2
+end
+
+# LDY [Absolute,X]
+$instructions[0xBC] = Proc.new do
+  addr = get_absolute_addr(fetch(), fetch())
+  puts "LDY $%04X,X" % addr
+  $reg_Y = $memory[addr]
+  update_NZ_flags($reg_Y)
+  # TODO +1 if page crossed
+  4
 end
 
 # LDX (Immediate)
@@ -522,12 +540,20 @@ $instructions[0xC8] = Proc.new do
   2
 end
 
-# CMP (Immediate)
+# CMP [Immediate]
 $instructions[0xC9] = Proc.new do
   param = fetch()
   puts "CMP \#$%02X" % param
   op_CMP($reg_A, param)
   2
+end
+
+# CMP [Zero Page]
+$instructions[0xC5] = Proc.new do
+  addr = fetch()
+  puts "CMP $%02X" % addr
+  op_CMP($reg_A, $memory[addr])
+  3
 end
 
 # BNE
@@ -569,6 +595,14 @@ $instructions[0xE0] = Proc.new do
   puts "CPX \#$%02X" % param
   op_CMP($reg_X, param)
   2
+end
+
+# CPX [Zero Page]
+$instructions[0xE4] = Proc.new do
+  addr = fetch()
+  puts "CPX $%02X" % addr
+  op_CMP($reg_X, $memory[addr])
+  3
 end
 
 # CPY [Immediate]
