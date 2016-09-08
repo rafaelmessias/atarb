@@ -31,6 +31,16 @@ def load_word()
   return low, high
 end
 
+def stack_push(byte)
+  $memory[$reg_SP] = byte
+  $reg_SP -=1
+end
+
+def stack_pull()
+  $reg_SP += 1
+  $memory[$reg_SP]
+end
+
 def byte_add(b1, b2)
   (b1 + b2) % 256
 end
