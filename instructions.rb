@@ -157,8 +157,8 @@ $instructions[0x20] = Proc.new do
   high = load_byte()
   addr = get_absolute_addr(low, high)
   puts "JSR $%04X" % addr
-  $memory[$reg_SP] = $reg_PC & 255
-  $memory[$reg_SP-1] = $reg_PC >> 8
+  $memory[$reg_SP] = ($reg_PC-1) & 255
+  $memory[$reg_SP-1] = ($reg_PC-1) >> 8
   $reg_SP -= 2
   $reg_PC = addr
   6
@@ -248,7 +248,7 @@ end
 $instructions[0x60] = Proc.new do
   puts "RTS"
   $reg_SP += 2
-  $reg_PC = $memory[$reg_SP] + $memory[$reg_SP-1] * 256
+  $reg_PC = $memory[$reg_SP] + $memory[$reg_SP-1] * 256 + 1
   6
 end
 
