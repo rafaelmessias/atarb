@@ -155,11 +155,12 @@ end
 $instructions[0x20] = Proc.new do
   low = load_byte()
   high = load_byte()
-  puts "JSR $%02X%02X" % [low, high]
+  addr = get_absolute_addr(low, high)
+  puts "JSR $%04X" % addr
   $memory[$reg_SP] = $reg_PC & 255
   $memory[$reg_SP-1] = $reg_PC >> 8
   $reg_SP -= 2
-  $reg_PC = get_absolute_addr(low, high)
+  $reg_PC = addr
   6
 end
 
