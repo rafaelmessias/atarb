@@ -55,8 +55,8 @@ while $reg_PC < 0xFFFF do
     print $flag_Z ? "Z " : "z "
     print $flag_C ? "C " : "c "
     print $flag_D ? "D " : "d "
-    if $reg_SP < 0xFF && !$memory[$reg_SP+1].nil?
-      print "| St: %02X | " % $memory[$reg_SP+1]
+    if $reg_SP < 0xFF && !$memory[$reg_SP+1].nil? && !$memory[$reg_SP+2].nil?
+      print "| St: %04X | " % ($memory[$reg_SP+2] + $memory[$reg_SP+1] * 256)
     end
     puts "-----"
   end

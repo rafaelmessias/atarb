@@ -132,12 +132,12 @@ end
 
 # BPL
 $instructions[0x10] = Proc.new do
-  param = load_byte()
+  addr = get_relative_addr(load_byte())
   # not sure if this is the correct way to disassemble
-  puts "BPL $%02X" % param
+  puts "BPL $%02X" % addr
   cycles = 2
   if !$flag_N
-    $reg_PC = get_relative_addr(param)
+    $reg_PC = addr
     cycles += 1
   end
   # TODO: +1 if the target is in a different page
@@ -156,9 +156,9 @@ $instructions[0x20] = Proc.new do
   low = load_byte()
   high = load_byte()
   puts "JSR $%02X%02X" % [low, high]
-  # TODO: This is wrong; PC is 16-bit
-  $memory[$reg_SP] = $reg_PC - 1
-  $reg_SP -= 1
+  $memory[$reg_SP] = $reg_PC & 255
+  $memory[$reg_SP-1] = $reg_PC >> 8
+  $reg_SP -= 2
   $reg_PC = get_absolute_addr(low, high)
   6
 end
@@ -246,9 +246,8 @@ end
 # RTS
 $instructions[0x60] = Proc.new do
   puts "RTS"
-  # TODO: This is wrong; PC is 16-bit
-  $reg_SP += 1
-  $reg_PC = $memory[$reg_SP] + 1
+  $reg_SP += 2
+  $reg_PC = $memory[$reg_SP] + $memory[$reg_SP-1] * 256
   6
 end
 
@@ -300,11 +299,11 @@ end
 
 # BCC
 $instructions[0x90] = Proc.new do
-  param = load_byte()
-  puts "BCC \$%02X" % param
+  addr = get_relative_addr(load_byte())
+  puts "BCC \$%02X" % addr
   cycles = 2
   if !$flag_C
-    $reg_PC = get_relative_addr(param)
+    $reg_PC = addr
     # TODO +1 if to a new page
     cycles += 1
   end
@@ -422,8 +421,7 @@ end
 
 # BCS
 $instructions[0xB0] = Proc.new do
-  param = load_byte()
-  addr = get_relative_addr(param)
+  addr = get_relative_addr(load_byte())
   puts "BCS $%02X" % addr
   cycles = 2
   if $flag_C
@@ -523,12 +521,12 @@ end
 
 # BNE
 $instructions[0xD0] = Proc.new do
-  param = load_byte()
+  addr = get_relative_addr(load_byte())
   # not sure if this is the correct way to disassemble
-  puts "BNE $%02X" % param
+  puts "BNE $%02X" % addr
   cycles = 2
   if !$flag_Z
-    $reg_PC = get_relative_addr(param)
+    $reg_PC = addr
     # TODO +1 if page crossed
     cycles += 1
   end
@@ -577,11 +575,11 @@ end
 
 # BEQ
 $instructions[0xF0] = Proc.new do
-  param = load_byte()
-  puts "BEQ $%02X" % param
+  addr = get_relative_addr(load_byte())
+  puts "BEQ $%02X" % addr
   cycles = 2
   if $flag_Z
-    $reg_PC = get_relative_addr(param)
+    $reg_PC = addr
     # TODO +1 if page crossed
     cycles += 1
   end
