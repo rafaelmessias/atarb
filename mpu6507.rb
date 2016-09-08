@@ -65,7 +65,7 @@ def update_NZ_flags(value)
 end
 
 def op_ASL(byte)
-  $flag_C = byte & 128
+  $flag_C = !(byte & 128).zero?
   byte = (byte << 1) % 256
   update_NZ_flags(byte)
   byte
@@ -139,5 +139,12 @@ def op_LSR(byte)
   $flag_C = !(byte % 2).zero?
   byte >>= 1
   update_NZ_flags(byte)
+  byte
+end
+
+def op_ROL(byte)
+  aux_C = !(byte & 128).zero?
+  byte = (byte << 1) + ($flag_C ? 1 : 0)
+  $flag_C = aux_C
   byte
 end

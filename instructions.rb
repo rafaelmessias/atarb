@@ -90,7 +90,7 @@ end
 # ASL [Zero Page]
 $instructions[0x06] = Proc.new do
   addr = fetch()
-  puts "ASL $%02X" % byte if Debug
+  puts "ASL $%02X" % addr if Debug
   $memory[addr] = op_ASL($memory[addr])
   5
 end
@@ -133,8 +133,7 @@ end
 # BPL
 $instructions[0x10] = Proc.new do
   addr = get_relative_addr(fetch())
-  # not sure if this is the correct way to disassemble
-  puts "BPL $%02X" % addr
+  puts "BPL $%04X" % addr
   cycles = 2
   if !$flag_N
     $reg_PC = addr
@@ -270,6 +269,14 @@ $instructions[0x85] = Proc.new do
   3
 end
 
+# STA [Absolute]
+$instructions[0x8D] = Proc.new do
+  addr = get_absolute_addr(fetch(), fetch())
+  puts "STA $%04X" % addr
+  $memory[addr] = $reg_A
+  4
+end
+
 # STX [Zero Page]
 $instructions[0x86] = Proc.new do
   param = fetch()
@@ -296,7 +303,7 @@ end
 # BCC
 $instructions[0x90] = Proc.new do
   addr = get_relative_addr(fetch())
-  puts "BCC \$%02X" % addr
+  puts "BCC $%04X" % addr
   cycles = 2
   if !$flag_C
     $reg_PC = addr
@@ -416,7 +423,7 @@ end
 # BCS
 $instructions[0xB0] = Proc.new do
   addr = get_relative_addr(fetch())
-  puts "BCS $%02X" % addr
+  puts "BCS $%04X" % addr
   cycles = 2
   if $flag_C
     $reg_PC = addr
@@ -518,10 +525,22 @@ end
 # BNE
 $instructions[0xD0] = Proc.new do
   addr = get_relative_addr(fetch())
-  # not sure if this is the correct way to disassemble
-  puts "BNE $%02X" % addr
+  puts "BNE $%04X" % addr
   cycles = 2
   if !$flag_Z
+    $reg_PC = addr
+    # TODO +1 if page crossed
+    cycles += 1
+  end
+  cycles
+end
+
+# BMI
+$instructions[0x30] = Proc.new do
+  addr = get_relative_addr(fetch())
+  puts "BMI $%04X" % addr
+  cycles = 2
+  if $flag_N
     $reg_PC = addr
     # TODO +1 if page crossed
     cycles += 1
@@ -588,7 +607,7 @@ end
 # BEQ
 $instructions[0xF0] = Proc.new do
   addr = get_relative_addr(fetch())
-  puts "BEQ $%02X" % addr
+  puts "BEQ $%04X" % addr
   cycles = 2
   if $flag_Z
     $reg_PC = addr
@@ -617,4 +636,19 @@ $instructions[0x4C] = Proc.new do
   puts "JMP $%04X" % addr
   $reg_PC = addr
   3
+end
+
+# ROL [Zero Page]
+$instructions[0x26] = Proc.new do
+  addr = fetch()
+  puts "ROL $%02X" % addr
+  $memory[addr] = op_ROL($memory[addr])
+  5
+end
+
+# ROL
+$instructions[0x2A] = Proc.new do
+  puts "ROL"
+  $reg_A = op_ROL($reg_A)
+  2
 end
