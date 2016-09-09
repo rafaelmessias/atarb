@@ -1,9 +1,7 @@
-
 # Question: what happens if I read from 0x294-0x297?
 # Question: what happens if I write 0 to a timer?
-#
+# Question: do the TIM*T addresses keep their last-written values?
 # TODO TIMINT should be cleared when read
-# TODO the first decrement is 1 cycle after a timer is set
 
 class PIA
 
@@ -38,31 +36,28 @@ class PIA
   end
 
   def self.tick
+    @timer -= 1
     # Start by checking if a timer was just set
     @intervals.each_key do |k|
       if $memory[k] > 0
-        # TODO setting the timer to 1 is a temporary hack; fix
-        @timer = 1
+        @timer = 0
         @interval = @intervals[k]
         $memory[INTIM] = $memory[k]
         $memory[TIMINT] = 0
+        # TODO Wrong.
+        $memory[k] = 0
       end
-      # These must always be cleared at every tick (right?)
-      $memory[k] = 0
     end
-    # Then proceed with counting down
-    if $memory[TIMINT] == 0
-      if $memory[INTIM] >= 0
-        @timer -= 1
-        if @timer <= 0
-          $memory[INTIM] -= 1
-          @timer += @interval
-        end
-      else
-        # this is obviously not right, but it'll do for now
+    # Then keep counting down normally
+    if @timer < 0
+      $memory[INTIM] -= 1
+      if $memory[INTIM] < 0
         $memory[INTIM] = 0xFF
         $memory[TIMINT] = 128
         @interval = 1
+        @timer = 0
+      else
+        @timer += @interval
       end
     end
   end
