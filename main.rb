@@ -1,20 +1,25 @@
 #!/usr/bin/env ruby
 
+require 'rubygame'
+
 require_relative 'mpu6507'
 require_relative 'instructions'
 require_relative 'pia6532'
+require_relative 'tia'
 
 # Misc. parameters
-Debug = true
+Debug = false
 
 # Hardware Setup
 PIA::start()
+TIA::start()
 
 $rom = IO.binread(ARGV[0])
 
 def sync(cycles)
   cycles.times do
     PIA::tick()
+    TIA::tick()
   end
 end
 
@@ -28,16 +33,20 @@ end
 while $reg_PC < 0xFFFF do
   print "%04X: " % $reg_PC if Debug
 
-  opcode = fetch()
-  instruction = $instructions[opcode]
+  cycles = 1
 
-  if !instruction.nil?
-    cycles = instruction.call
-    sync(cycles)
-  else
-    puts "%02X ???" % opcode
-    exit
+  if !$wSync
+    opcode = fetch()
+    instruction = $instructions[opcode]
+    if !instruction.nil?
+      cycles = instruction.call
+    else
+      puts "%02X ???" % opcode
+      exit
+    end
   end
+
+  sync(cycles)
 
   if Debug
     print "----- "

@@ -3,9 +3,15 @@
 # Question: do the TIM*T addresses keep their last-written values?
 # TODO TIMINT should be cleared when read
 
+# TODO Ticking every clock can be a problem... if a timer was set, then
+#   it will immediately count down X-1 ticks, with X being the size of
+#   the write instruction. The correct way is: if there was a timer set,
+#   then that should be the only thing to be done for that specific
+#   "round" (with "round" being the set of X ticks).
+
 class PIA
 
-  # Mnemonics
+  # Important Addresses
   SWCHB = 0x282
   SWCHA = 0x280
   INTIM = 0x284

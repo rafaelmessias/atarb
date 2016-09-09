@@ -269,19 +269,27 @@ $instructions[0x78] = Proc.new do
   2
 end
 
-# STY (Zero Page)
+# STY [Zero Page]
 $instructions[0x84] = Proc.new do
-  param = fetch()
-  puts "STY $%02X" % param if Debug
-  $memory[param] = $reg_Y
+  addr = fetch()
+  puts "STY $%02X" % addr if Debug
+  if addr == 2 # WSYNC
+    $wSync = true
+  else
+    $memory[addr] = $reg_Y
+  end
   3
 end
 
 # STA [Zero Page]
 $instructions[0x85] = Proc.new do
-  param = fetch()
-  puts "STA $%02X" % param if Debug
-  $memory[param] = $reg_A
+  addr = fetch()
+  puts "STA $%02X" % addr if Debug
+  if addr == 2 # WSYNC
+    $wSync = true
+  else
+    $memory[addr] = $reg_A
+  end
   3
 end
 
@@ -295,9 +303,13 @@ end
 
 # STX [Zero Page]
 $instructions[0x86] = Proc.new do
-  param = fetch()
-  puts "STX $%02X" % param if Debug
-  $memory[param] = $reg_X
+  addr = fetch()
+  puts "STX $%02X" % addr if Debug
+  if addr == 2 # WSYNC
+    $wSync = true
+  else
+    $memory[addr] = $reg_X
+  end
   3
 end
 

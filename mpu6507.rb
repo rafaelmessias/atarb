@@ -1,6 +1,9 @@
 # TODO I need a way to control read-only memory addresses
 # TODO I also need a way to trigger strobes from memory access
 
+# temporary hack
+$wSync = false
+
 # Memory
 $memory = {}
 
