@@ -3,7 +3,19 @@
 #
 # Note: (Indirect,X) has zero page wrap-around
 
-# TODO Stop calling these Proc's
+# TODO Stop calling these Proc's?
+
+class Instruction
+  attr_reader :bytes, :cycles, :debug, :code, :params
+
+  def initialize(bytes:, cycles:, debug:, code:, params:)
+    @bytes = bytes
+    @cycles = cycles
+    @debug = debug
+    @code = code
+    @params = params
+  end
+end
 
 # There will be a lot of empty spaces in this array...
 $instructions = []
@@ -265,12 +277,14 @@ $instructions[0x60] = Proc.new do
 end
 
 # SEI
-$instructions[0x78] = Proc.new do
-  puts "SEI" if Debug
-#  $flag_Int = true
-  # TODO Ignoring this for now.
-  [2, 0x90] # NOP
-end
+$instructions[0x78] = Instruction.new(
+  bytes: 1, cycles: 2,
+  debug: "SEI",
+  code: [
+    0x90      # NOP
+  ],
+  params: []
+)
 
 # STY [Zero Page]
 $instructions[0x84] = Proc.new do
@@ -395,15 +409,15 @@ $instructions[0xBC] = Proc.new do
 end
 
 # LDX (Immediate)
-$instructions[0xA2] = Proc.new do
-  imm = fetch()
-  puts "LDX \#\$%02X" % imm if Debug
-#  $reg_X = imm
-#  update_NZ_flags($reg_X)
-  [2,
-   0xB3, imm,           # MOV BL, imm   ; BL is X
-   0x80, 0xFB, 0x00]    # CMP BL, 0     ; for the flags
-end
+$instructions[0xA2] = Instruction.new(
+  bytes: 2, cycles: 2,
+  debug: "LDX \#$%02X",
+  code: [
+    0xB3, 0x00,         # MOV BL, imm   ; BL is X
+    0x80, 0xFB, 0x00    # CMP BL, 0     ; for the flags
+  ],
+  params: [1]
+)
 
 # LDY (Zero Page)
 $instructions[0xA4] = Proc.new do
@@ -606,6 +620,16 @@ $instructions[0xD8] = Proc.new do
   #  TODO Ignoring this for now.
   [2, 0x90] # NOP
 end
+
+# CLD
+$instructions[0xD8] = Instruction.new(
+  bytes: 1, cycles: 2,
+  debug: "CLD",
+  code: [
+    0x90      # NOP
+  ],
+  params: []
+)
 
 # CPX [Immediate]
 $instructions[0xE0] = Proc.new do

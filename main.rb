@@ -33,7 +33,6 @@ end
 x86_block = []
 
 while true do
-  print "%04X: " % $reg_PC if Debug
 
 #  cycles = 1
 
@@ -41,10 +40,15 @@ while true do
     opcode = fetch()
     instruction = $instructions[opcode]
     begin
-      result = instruction.call
-      raise "ERROR: Unable to recompile" if result.size < 2
-#      cycles += result[0]
-      x86_block << result[1..result.size-1]
+      raise "ERROR: Unable to recompile" if !instruction.kind_of?(Instruction)
+      code = instruction.code
+      instruction.params.each {|i| code[i] = fetch()}
+#      cycles += instruction.cycles
+      x86_block << code
+      if Debug
+        print "%04X: " % $reg_PC
+        puts (instruction.debug % instruction.params.map {|i| code[i]})
+      end
     rescue Exception => e
       puts "#{e.message}: %02X" % opcode
       break
@@ -52,22 +56,6 @@ while true do
 #  end
 
 #  sync(cycles)
-
-  if Debug
-    print "----- "
-    print "A: %02X, " % $reg_A
-    print "X: %02X, " % $reg_X
-    print "Y: %02X, " % $reg_Y
-    print "SP: %02X, " % $reg_SP
-    print $flag_N ? "N " : "n "
-    print $flag_Z ? "Z " : "z "
-    print $flag_C ? "C " : "c "
-#    print $flag_D ? "D " : "d "
-    if $reg_SP < 0xFF && !$memory[$reg_SP+1].nil? && !$memory[$reg_SP+2].nil?
-      print "| St: %04X | " % ($memory[$reg_SP+1] + $memory[$reg_SP+2] * 256)
-    end
-    puts "-----"
-  end
 
 end
 
@@ -78,4 +66,20 @@ x86_block.each do |block|
   else
     puts block
   end
+end
+
+if Debug
+  print "----- "
+  print "A: %02X, " % $reg_A
+  print "X: %02X, " % $reg_X
+  print "Y: %02X, " % $reg_Y
+  print "SP: %02X, " % $reg_SP
+  print $flag_N ? "N " : "n "
+  print $flag_Z ? "Z " : "z "
+  print $flag_C ? "C " : "c "
+#  print $flag_D ? "D " : "d "
+  if $reg_SP < 0xFF && !$memory[$reg_SP+1].nil? && !$memory[$reg_SP+2].nil?
+    print "| St: %04X | " % ($memory[$reg_SP+1] + $memory[$reg_SP+2] * 256)
+  end
+  puts "-----"
 end
