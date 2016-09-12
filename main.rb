@@ -8,7 +8,7 @@ require_relative 'pia6532'
 require_relative 'tia'
 
 # Misc. parameters
-Debug = false
+Debug = true
 
 # Hardware Setup
 PIA::start()
@@ -30,23 +30,28 @@ $rom.each_char do |char|
   addr += 1
 end
 
-while $reg_PC < 0xFFFF do
+x86_block = []
+
+while true do
   print "%04X: " % $reg_PC if Debug
 
-  cycles = 1
+#  cycles = 1
 
-  if !$wSync
+#  if !$wSync
     opcode = fetch()
     instruction = $instructions[opcode]
-    if !instruction.nil?
-      cycles = instruction.call
-    else
-      puts "%02X ???" % opcode
-      exit
+    begin
+      result = instruction.call
+      raise "ERROR: Unable to recompile" if result.size < 2
+#      cycles += result[0]
+      x86_block << result[1..result.size-1]
+    rescue Exception => e
+      puts "#{e.message}: %02X" % opcode
+      break
     end
-  end
+#  end
 
-  sync(cycles)
+#  sync(cycles)
 
   if Debug
     print "----- "
@@ -57,7 +62,7 @@ while $reg_PC < 0xFFFF do
     print $flag_N ? "N " : "n "
     print $flag_Z ? "Z " : "z "
     print $flag_C ? "C " : "c "
-    print $flag_D ? "D " : "d "
+#    print $flag_D ? "D " : "d "
     if $reg_SP < 0xFF && !$memory[$reg_SP+1].nil? && !$memory[$reg_SP+2].nil?
       print "| St: %04X | " % ($memory[$reg_SP+1] + $memory[$reg_SP+2] * 256)
     end
@@ -66,4 +71,11 @@ while $reg_PC < 0xFFFF do
 
 end
 
-
+puts "Block of x86 machine code so far:"
+x86_block.each do |block|
+  if block.kind_of?(Array)
+    puts block.map {|b| "%02X" % b}.join(', ')
+  else
+    puts block
+  end
+end
