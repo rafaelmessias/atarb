@@ -8,7 +8,7 @@
 class Instruction
   attr_reader :bytes, :cycles, :debug, :code, :params
 
-  def initialize(bytes:, cycles:, debug:, code:, params:)
+  def initialize(bytes: 1, cycles: 2, debug:, code: [0x90], params: [])
     @bytes = bytes
     @cycles = cycles
     @debug = debug
@@ -278,12 +278,7 @@ end
 
 # SEI
 $instructions[0x78] = Instruction.new(
-  bytes: 1, cycles: 2,
   debug: "SEI",
-  code: [
-    0x90      # NOP
-  ],
-  params: []
 )
 
 # STY [Zero Page]
@@ -383,11 +378,12 @@ $instructions[0x98] = Proc.new do
 end
 
 # TXS
-$instructions[0x9A] = Proc.new do
-  puts "TXS" if Debug
-  $reg_SP = $reg_X
-  [2]
-end
+$instructions[0x9A] = Instruction.new(
+  debug: "TXS",
+  code: [
+    0x88, 0xD9      # mov cl, bl
+  ]
+)
 
 # LDY [Immediate]
 $instructions[0xA0] = Proc.new do
@@ -614,21 +610,8 @@ $instructions[0x30] = Proc.new do
 end
 
 # CLD
-$instructions[0xD8] = Proc.new do
-  puts "CLD" if Debug
-#  $flag_D = false
-  #  TODO Ignoring this for now.
-  [2, 0x90] # NOP
-end
-
-# CLD
 $instructions[0xD8] = Instruction.new(
-  bytes: 1, cycles: 2,
   debug: "CLD",
-  code: [
-    0x90      # NOP
-  ],
-  params: []
 )
 
 # CPX [Immediate]

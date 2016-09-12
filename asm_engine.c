@@ -28,13 +28,13 @@ typedef uint32_t dword;
 // N      N
 
 void asm_engine(unsigned char *code) {
-  word ax = 0, bx = 0;
-  byte reg_A = 0, reg_X = 0, flags = 0;
-  __asm__ (
-      "call *%2\n\t"          // call code
+  word ax = 0, bx = 0, cx = 0;
+  byte reg_A = 0, reg_X = 0, reg_SP = 0, flags = 0;
+  __asm__ volatile (
+      "call *%[code]\n\t"          // call code
       "lahf"                  // flags go to AH
-      : "=a" (ax), "=b" (bx)
-      : "r" (code)
+      : "=a" (ax), "=b" (bx), "=c" (reg_SP)
+      : [code] "r" (code)
   );
   reg_A = ax & 0xFF;
   reg_X = bx & 0xFF;
@@ -42,6 +42,7 @@ void asm_engine(unsigned char *code) {
   // Debug
   printf("reg_A: %d\n", reg_A);
   printf("reg_X: %d\n", reg_X);
+  printf("reg_SP: %d\n", reg_SP);
   printf("flags: %d\n", flags);
   printf("  carry: %d\n", flags & 1);
   printf("  zero: %d\n", (flags >> 6) & 1);
@@ -51,8 +52,9 @@ void asm_engine(unsigned char *code) {
 int main() {
   unsigned char code[] = {
     0x90, 0x90,
-    0xB3, 0x00,         // mov $255, %bl
-    0x80, 0xFB, 0x00,   // cmp $0, %bl
+    0xB3, 0xAB,         // mov $??, %bl
+    0x80, 0xFB, 0x00,   // cmp $0, %bl   ; flags
+    0x88, 0xD9,         // mov %bl, %cl
     0xC3                // ret
   };
   void* ptr = mmap(0, sizeof(code),
