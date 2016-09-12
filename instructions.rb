@@ -1,3 +1,23 @@
+=begin
+  Copyleft (<) 2016, Rafael Martins.
+
+  This file is part of 'ata.rb'.
+
+  'ata.rb' is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version. Please, don't hate me for the way
+  I write multiline comments in ruby.
+
+  'ata.rb' is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with 'ata.rb'.  If not, see <http://www.gnu.org/licenses/>.
+=end
+
 # Question: Can a ZP,X instruction overflow into page 1?
 # Question: when disassembling an Absolute address, what's the byte order?
 #
